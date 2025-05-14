@@ -255,107 +255,375 @@ class EmergencyModel:
             return (Q_star, q_star), max_profit, result
 
 
-# 主函数：应用模型求解案例
-def main():
+def perform_sensitivity_analysis(model_class, base_params, param_name, param_values, dist_name, T):
+    """
+    执行敏感性分析并返回不同参数值下的最优储备量
+
+    参数:
+    model_class - 模型类
+    base_params - 基本参数字典
+    param_name - 要分析的参数名称
+    param_values - 参数取值列表
+    dist_name - 分布名称("GP"或"Uniform")
+    T - 总需求量
+
+    返回:
+    Q_values - 政府实物储备量列表
+    q_values - 企业实物储备量列表
+    p_values - 企业生产能力储备量列表
+    """
+    Q_values = []
+    q_values = []
+    p_values = []
+
+    for value in param_values:
+        # 复制基本参数并更新待分析参数
+        params = base_params.copy()
+        params[param_name] = value
+
+        # 创建适当的分布
+        if dist_name == "GP":
+            dist = GPDistribution(1.26089, 1059.03, 0)
+        else:  # Uniform
+            dist = UniformDistribution(0, T)
+
+        # 创建并求解模型
+        model = EmergencyModel(
+            params['alpha'], params['v'], params['p1'], params['c1'],
+            params['p2'], params['s'], params['m'], dist
+        )
+
+        try:
+            optimal, _, _ = model.solve(
+                initial_guess=[T * 0.3, T * 0.1],  # 基于总需求的初始猜测
+                multi_start=True,
+                n_starts=10
+            )
+
+            Q_star, q_star = optimal
+            p_star = T - Q_star - q_star  # 企业生产能力储备 = 总需求 - 政府储备 - 企业储备
+
+            Q_values.append(Q_star)
+            q_values.append(q_star)
+            p_values.append(p_star)
+
+            print(f"{dist_name}分布, {param_name}={value}: Q*={Q_star:.2f}, q*={q_star:.2f}, p*={p_star:.2f}")
+
+        except Exception as e:
+            print(f"求解失败 ({dist_name}分布, {param_name}={value}): {e}")
+            # 添加None作为占位符，表示求解失败点
+            Q_values.append(None)
+            q_values.append(None)
+            p_values.append(None)
+
+    return Q_values, q_values, p_values
+
+
+def plot_sensitivity(param_name, param_values, gp_results, uniform_results, param_label, filename, T):
+    """
+    绘制敏感性分析图
+
+    参数:
+    param_name - 参数名称
+    param_values - 参数值列表
+    gp_results - GP分布结果 (Q, q, p)
+    uniform_results - 均匀分布结果 (Q, q, p)
+    param_label - 图表中显示的参数标签
+    filename - 保存的文件名
+    T - 总需求量，用于归一化
+    """
+    # 提取结果
+    gp_Q, gp_q, gp_p = gp_results
+    uniform_Q, uniform_q, uniform_p = uniform_results
+
+    plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
+    plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
+
+    # 创建图形
+    plt.figure(figsize=(12, 10))
+
+    # 设置布局和标题
+    plt.suptitle(f'敏感性分析: {param_label}对最优储备量的影响', fontsize=16)
+
+    # 广义帕累托分布子图
+    plt.subplot(2, 1, 1)
+
+    # 非空值的索引
+    valid_indices = [i for i, v in enumerate(gp_Q) if v is not None]
+    valid_params = [param_values[i] for i in valid_indices]
+
+    # 绘制GP分布结果
+    if valid_indices:
+        valid_gp_Q = [gp_Q[i] for i in valid_indices]
+        valid_gp_q = [gp_q[i] for i in valid_indices]
+        valid_gp_p = [gp_p[i] for i in valid_indices]
+
+        plt.plot(valid_params, valid_gp_Q, 'ro-', linewidth=2, markersize=8, label='政府实物储备量 (Q*)')
+        plt.plot(valid_params, valid_gp_q, 'bs-', linewidth=2, markersize=8, label='企业实物储备量 (q*)')
+        plt.plot(valid_params, valid_gp_p, 'gd-', linewidth=2, markersize=8, label='企业生产能力储备量 (p*)')
+
+    plt.title('广义帕累托分布 (GPD)')
+    plt.xlabel(param_label)
+    plt.ylabel('储备量 (万件)')
+    plt.legend()
+    plt.grid(True)
+
+    # 均匀分布子图
+    plt.subplot(2, 1, 2)
+
+    # 非空值的索引
+    valid_indices = [i for i, v in enumerate(uniform_Q) if v is not None]
+    valid_params = [param_values[i] for i in valid_indices]
+
+    # 绘制均匀分布结果
+    if valid_indices:
+        valid_uniform_Q = [uniform_Q[i] for i in valid_indices]
+        valid_uniform_q = [uniform_q[i] for i in valid_indices]
+        valid_uniform_p = [uniform_p[i] for i in valid_indices]
+
+        plt.plot(valid_params, valid_uniform_Q, 'ro-', linewidth=2, markersize=8, label='政府实物储备量 (Q*)')
+        plt.plot(valid_params, valid_uniform_q, 'bs-', linewidth=2, markersize=8, label='企业实物储备量 (q*)')
+        plt.plot(valid_params, valid_uniform_p, 'gd-', linewidth=2, markersize=8, label='企业生产能力储备量 (p*)')
+
+    plt.title('均匀分布 (UD)')
+    plt.xlabel(param_label)
+    plt.ylabel('储备量 (万件)')
+    plt.legend()
+    plt.grid(True)
+
+    # 调整布局并保存
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    plt.savefig(filename, dpi=300, bbox_inches='tight')
+    plt.show()
+
+
+def plot_stacked_bar(gp_result, uniform_result, T):
+    """
+    绘制堆叠柱状图比较两种分布方式下的储备结构
+
+    参数:
+    gp_result - GP分布的结果 (Q*, q*, p*)
+    uniform_result - 均匀分布的结果 (Q*, q*, p*)
+    T - 总需求量
+    """
+    labels = ['广义帕累托分布', '均匀分布']
+
+    # 提取结果
+    Q_gp, q_gp, p_gp = gp_result
+    Q_uniform, q_uniform, p_uniform = uniform_result
+
+    # 计算比例
+    Q_gp_ratio = Q_gp / T
+    q_gp_ratio = q_gp / T
+    p_gp_ratio = p_gp / T
+
+    Q_uniform_ratio = Q_uniform / T
+    q_uniform_ratio = q_uniform / T
+    p_uniform_ratio = p_uniform / T
+
+    # 数据准备
+    Q_values = [Q_gp_ratio, Q_uniform_ratio]
+    q_values = [q_gp_ratio, q_uniform_ratio]
+    p_values = [p_gp_ratio, p_uniform_ratio]
+
+    # 绘制堆叠柱状图
+    fig, ax = plt.subplots(figsize=(10, 8))
+
+    # 底部位置初始化
+    bottoms = [0, 0]
+
+    # 绘制三种储备方式的堆叠柱状图
+    p1 = ax.bar(labels, Q_values, label='政府实物储备 (Q*)', color='#3274A1')
+    p2 = ax.bar(labels, q_values, bottom=Q_values, label='企业实物储备 (q*)', color='#E1812C')
+    p3 = ax.bar(labels, p_values, bottom=[Q_values[i] + q_values[i] for i in range(len(labels))],
+                label='企业生产能力储备 (p*)', color='#3A923A')
+
+    # 添加百分比标签
+    def add_labels(bars, values):
+        for bar, value in zip(bars, values):
+            height = bar.get_height()
+            if height > 0.03:  # 仅当比例足够大时显示标签
+                ax.text(bar.get_x() + bar.get_width() / 2.,
+                        bar.get_y() + height / 2.,
+                        f'{value:.1%}',
+                        ha='center', va='center', color='white', fontweight='bold')
+
+    add_labels(p1, Q_values)
+    add_labels(p2, q_values)
+    add_labels(p3, p_values)
+
+    # 设置图表
+    ax.set_ylim(0, 1.0)
+    ax.set_ylabel('储备占比')
+    ax.set_title('不同概率分布下的最优储备结构对比')
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=3)
+
+    # 在柱状图上方添加总需求量信息
+    for i, label in enumerate(labels):
+        ax.text(i, 1.02, f'总需求: {T}万件', ha='center')
+
+    plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
+    plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
+    plt.tight_layout()
+    plt.savefig('储备结构对比.png', dpi=300, bbox_inches='tight')
+    plt.show()
+
+
+def run_sensitivity_analysis():
+    """运行完整的敏感性分析"""
     # 模型参数
-    v = 100  # 单位物资残值
-    p1 = 200  # 灾害前物资单价
-    m = 500  # 灾害后应急物资市场单价
-    alpha = 1  # 灾害发生概率
-    e = 400  # 企业单位物资加急生产成本
-    p2 = 170  # 企业单位物资代储收入
-    c2 = 300  # 企业单位物资储存成本
-    s = 180  # 企业单位物资使用补贴
-    c1 = 120  # 政府单位物资储存成本
     T = 5551  # 应急物资总需求量（万件）
 
+    base_params = {
+        'alpha': 1,  # 灾害发生概率
+        'v': 100,  # 单位物资残值
+        'p1': 200,  # 灾害前物资单价
+        'c1': 120,  # 政府单位物资储存成本
+        'p2': 170,  # 企业单位物资代储收入
+        's': 180,  # 企业单位物资使用补贴
+        'm': 500,  # 灾害后物资市场单价
+    }
+
+    # 记录基本情况的最优解
+    print("计算基准解...")
     uniform_dist = UniformDistribution(0, T)
-
-
-    # 广义帕累托参数
     gp_dist = GPDistribution(1.26089, 1059.03, 0)
 
-    # 均匀分布
-    model_uniform = EmergencyModel(alpha, v, p1, c1, p2, s, m, uniform_dist)
+    model_uniform = EmergencyModel(
+        base_params['alpha'], base_params['v'], base_params['p1'], base_params['c1'],
+        base_params['p2'], base_params['s'], base_params['m'], uniform_dist
+    )
 
-    # 求解最优储备量
-    print("使用均匀分布求解...")
-    try:
-        optimal_uniform, profit_uniform, results_uniform = model_uniform.solve(
-            initial_guess=[2000, 1000],  # 给一个更合理的初始猜测
-            multi_start=True,
-            n_starts=50
+    model_gp = EmergencyModel(
+        base_params['alpha'], base_params['v'], base_params['p1'], base_params['c1'],
+        base_params['p2'], base_params['s'], base_params['m'], gp_dist
+    )
+
+    optimal_uniform, profit_uniform, _ = model_uniform.solve(
+        initial_guess=[T * 0.2, T * 0.1], multi_start=True, n_starts=10
+    )
+
+    optimal_gp, profit_gp, _ = model_gp.solve(
+        initial_guess=[T * 0.2, T * 0.1], multi_start=True, n_starts=10
+    )
+
+    Q_uniform, q_uniform = optimal_uniform
+    p_uniform = T - Q_uniform - q_uniform
+
+    Q_gp, q_gp = optimal_gp
+    p_gp = T - Q_gp - q_gp
+
+    print(f"\n基准解 - 均匀分布:")
+    print(f"政府实物储备量(Q*): {Q_uniform:.2f} ({Q_uniform / T:.2%})")
+    print(f"企业实物储备量(q*): {q_uniform:.2f} ({q_uniform / T:.2%})")
+    print(f"企业生产能力储备量(p*): {p_uniform:.2f} ({p_uniform / T:.2%})")
+    print(f"最大利润: {profit_uniform:.2f}")
+
+    print(f"\n基准解 - 广义帕累托分布:")
+    print(f"政府实物储备量(Q*): {Q_gp:.2f} ({Q_gp / T:.2%})")
+    print(f"企业实物储备量(q*): {q_gp:.2f} ({q_gp / T:.2%})")
+    print(f"企业生产能力储备量(p*): {p_gp:.2f} ({p_gp / T:.2%})")
+    print(f"最大利润: {profit_gp:.2f}")
+
+    # 绘制储备结构对比图
+    gp_result = (Q_gp, q_gp, p_gp)
+    uniform_result = (Q_uniform, q_uniform, p_uniform)
+    plot_stacked_bar(gp_result, uniform_result, T)
+
+    # 敏感性分析参数设置
+    sensitivity_params = [
+        # 参数名, 参数值范围, 图表标签, 文件名
+        ('alpha', [0.8, 0.84, 0.88, 0.92, 0.96, 1.0], '灾害发生概率 (α)', 'sensitivity_alpha.png'),
+        ('v', [75, 80, 85, 90, 95, 100], '单位物资残值 (v)', 'sensitivity_v.png'),
+        ('s', [160, 162, 164, 166, 168, 170, 172, 174, 176, 178, 180, 182, 184, 186, 188, 190], '企业单位物资使用补贴 (s)', 'sensitivity_s.png'),
+        ('p2', [150, 152, 154, 156, 158, 160, 162, 164, 166, 168, 170], '企业单位物资代储收入 (p2)', 'sensitivity_p2.png'),
+        ('p1', [200, 202, 204, 206, 208, 210, 212, 214, 216, 218, 220], '灾害前物资单价 (p1)', 'sensitivity_p1.png'),
+        ('c1', [120, 122, 124, 126, 128, 130, 132, 134, 136, 138, 140], '政府单位物资储存成本 (c1)', 'sensitivity_c1.png'),
+        ('m', [500, 505, 510, 515, 520, 525, 530, 535, 540, 545, 550], '灾害后市场单价 (m)', 'sensitivity_m.png'),
+    ]
+
+    # 执行敏感性分析
+    for param_name, param_values, param_label, filename in sensitivity_params:
+        print(f"\n执行敏感性分析: {param_label}")
+
+        # GP分布敏感性分析
+        gp_results = perform_sensitivity_analysis(
+            EmergencyModel, base_params, param_name, param_values, "GP", T
         )
 
-        print(f"最优政府储备量(Q*): {optimal_uniform[0]:.4f}")
-        print(f"最优企业储备量(q*): {optimal_uniform[1]:.4f}")
-        print(f"最大利润: {profit_uniform:.4f}")
-
-        # # 可视化不同储备量下的利润(针对均匀分布)
-        # Q_range = np.linspace(20, 50, 20)
-        # q_range = np.linspace(0, 30, 20)
-        # Q_grid, q_grid = np.meshgrid(Q_range, q_range)
-        # profit_grid = np.zeros_like(Q_grid)
-        #
-        # for i in range(Q_grid.shape[0]):
-        #     for j in range(Q_grid.shape[1]):
-        #         profit_grid[i, j] = -model_uniform.government_profit([Q_grid[i, j], q_grid[i, j]])
-        #
-        # plt.figure(figsize=(10, 8))
-        # contour = plt.contourf(Q_grid, q_grid, profit_grid, 50, cmap='viridis')
-        # plt.colorbar(contour, label='Profit')
-        # plt.plot(optimal_uniform[0], optimal_uniform[1], 'ro', markersize=10, label='Optimal Point')
-        # plt.xlabel('Government Reserve (Q)')
-        # plt.ylabel('Enterprise Reserve (q)')
-        # plt.title('Profit Landscape (Uniform Distribution)')
-        # plt.legend()
-        # plt.grid(True)
-        # plt.savefig('profit_landscape_uniform.png')
-        # plt.show()
-
-    except Exception as e:
-        print(f"均匀分布模型求解失败: {e}")
-
-    # 创建模型实例 - 使用广义帕累托分布
-    try:
-        model_gp = EmergencyModel(alpha, v, p1, c1, p2, s, m, gp_dist)
-
-        # 求解最优储备量
-        print("\n使用广义帕累托分布求解...")
-        optimal_gp, profit_gp, results_gp = model_gp.solve(
-            initial_guess=[100, 100],
-            multi_start=True,
-            n_starts=50
+        # 均匀分布敏感性分析
+        uniform_results = perform_sensitivity_analysis(
+            EmergencyModel, base_params, param_name, param_values, "Uniform", T
         )
 
-        print(f"最优政府储备量(Q*): {optimal_gp[0]:.4f}")
-        print(f"最优企业储备量(q*): {optimal_gp[1]:.4f}")
-        print(f"最大利润: {profit_gp:.4f}")
+        # 绘制并保存图表
+        plot_sensitivity(param_name, param_values, gp_results, uniform_results, param_label, filename, T)
 
-        # # 可视化不同储备量下的利润(针对广义帕累托分布)
-        # Q_range = np.linspace(20, 50, 20)
-        # q_range = np.linspace(0, 30, 20)
-        # Q_grid, q_grid = np.meshgrid(Q_range, q_range)
-        # profit_grid = np.zeros_like(Q_grid)
-        #
-        # for i in range(Q_grid.shape[0]):
-        #     for j in range(Q_grid.shape[1]):
-        #         profit_grid[i, j] = -model_gp.government_profit([Q_grid[i, j], q_grid[i, j]])
-        #
-        # plt.figure(figsize=(10, 8))
-        # contour = plt.contourf(Q_grid, q_grid, profit_grid, 50, cmap='viridis')
-        # plt.colorbar(contour, label='Profit')
-        # plt.plot(optimal_gp[0], optimal_gp[1], 'ro', markersize=10, label='Optimal Point')
-        # plt.xlabel('Government Reserve (Q)')
-        # plt.ylabel('Enterprise Reserve (q)')
-        # plt.title('Profit Landscape (Generalized Pareto Distribution)')
-        # plt.legend()
-        # plt.grid(True)
-        # plt.savefig('profit_landscape_gp.png')
-        # plt.show()
+        print(f"完成 {param_label} 敏感性分析并保存图表到 {filename}")
 
-    except Exception as e:
-        print(f"广义帕累托分布模型求解失败: {e}")
+# 主函数：应用模型求解案例
+def main():
+    # # 模型参数
+    # v = 100  # 单位物资残值
+    # p1 = 200  # 灾害前物资单价
+    # m = 500  # 灾害后应急物资市场单价
+    # alpha = 1  # 灾害发生概率
+    # e = 400  # 企业单位物资加急生产成本
+    # p2 = 170  # 企业单位物资代储收入
+    # c2 = 300  # 企业单位物资储存成本
+    # s = 180  # 企业单位物资使用补贴
+    # c1 = 120  # 政府单位物资储存成本
+    # T = 5551  # 应急物资总需求量（万件）
+    #
+    # uniform_dist = UniformDistribution(0, T)
+    #
+    #
+    # # 广义帕累托参数
+    # gp_dist = GPDistribution(1.26089, 1059.03, 0)
+    #
+    # # 均匀分布
+    # model_uniform = EmergencyModel(alpha, v, p1, c1, p2, s, m, uniform_dist)
+    #
+    # # 求解最优储备量
+    # print("使用均匀分布求解...")
+    # try:
+    #     optimal_uniform, profit_uniform, results_uniform = model_uniform.solve(
+    #         initial_guess=[2000, 1000],  # 给一个更合理的初始猜测
+    #         multi_start=True,
+    #         n_starts=50
+    #     )
+    #
+    #     print(f"最优政府储备量(Q*): {optimal_uniform[0]:.4f}")
+    #     print(f"最优企业储备量(q*): {optimal_uniform[1]:.4f}")
+    #     print(f"最大利润: {profit_uniform:.4f}")
+    #
+    #
+    # except Exception as e:
+    #     print(f"均匀分布模型求解失败: {e}")
+    #
+    # # 创建模型实例 - 使用广义帕累托分布
+    # try:
+    #     model_gp = EmergencyModel(alpha, v, p1, c1, p2, s, m, gp_dist)
+    #
+    #     # 求解最优储备量
+    #     print("\n使用广义帕累托分布求解...")
+    #     optimal_gp, profit_gp, results_gp = model_gp.solve(
+    #         initial_guess=[100, 100],
+    #         multi_start=True,
+    #         n_starts=50
+    #     )
+    #
+    #     print(f"最优政府储备量(Q*): {optimal_gp[0]:.4f}")
+    #     print(f"最优企业储备量(q*): {optimal_gp[1]:.4f}")
+    #     print(f"最大利润: {profit_gp:.4f}")
+    #
+    #
+    # except Exception as e:
+    #     print(f"广义帕累托分布模型求解失败: {e}")
+
+    # 运行敏感性分析
+    print("开始敏感性分析...")
+    run_sensitivity_analysis()
 
 
 if __name__ == "__main__":
