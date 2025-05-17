@@ -152,7 +152,7 @@ class EmergencyModel:
 
         # 情况3：x > Q+q
         # 使用截断上限进行积分，因为无穷大可能导致积分不收敛
-        upper_limit = Q + q + 100000000 # 选择一个足够大的上限值
+        upper_limit = 1000000 # 选择一个足够大的上限值
 
         # 如果使用的是均匀分布，可以直接使用分布的上限
         if isinstance(self.dist, UniformDistribution):
@@ -563,67 +563,67 @@ def run_sensitivity_analysis():
 
 # 主函数：应用模型求解案例
 def main():
-    # # 模型参数
-    # v = 100  # 单位物资残值
-    # p1 = 200  # 灾害前物资单价
-    # m = 500  # 灾害后应急物资市场单价
-    # alpha = 1  # 灾害发生概率
-    # e = 400  # 企业单位物资加急生产成本
-    # p2 = 170  # 企业单位物资代储收入
-    # c2 = 300  # 企业单位物资储存成本
-    # s = 180  # 企业单位物资使用补贴
-    # c1 = 120  # 政府单位物资储存成本
-    # T = 5551  # 应急物资总需求量（万件）
-    #
-    # uniform_dist = UniformDistribution(0, T)
-    #
-    #
-    # # 广义帕累托参数
-    # gp_dist = GPDistribution(1.26089, 1059.03, 0)
-    #
-    # # 均匀分布
-    # model_uniform = EmergencyModel(alpha, v, p1, c1, p2, s, m, uniform_dist)
-    #
-    # # 求解最优储备量
-    # print("使用均匀分布求解...")
-    # try:
-    #     optimal_uniform, profit_uniform, results_uniform = model_uniform.solve(
-    #         initial_guess=[2000, 1000],  # 给一个更合理的初始猜测
-    #         multi_start=True,
-    #         n_starts=50
-    #     )
-    #
-    #     print(f"最优政府储备量(Q*): {optimal_uniform[0]:.4f}")
-    #     print(f"最优企业储备量(q*): {optimal_uniform[1]:.4f}")
-    #     print(f"最大利润: {profit_uniform:.4f}")
-    #
-    #
-    # except Exception as e:
-    #     print(f"均匀分布模型求解失败: {e}")
-    #
-    # # 创建模型实例 - 使用广义帕累托分布
-    # try:
-    #     model_gp = EmergencyModel(alpha, v, p1, c1, p2, s, m, gp_dist)
-    #
-    #     # 求解最优储备量
-    #     print("\n使用广义帕累托分布求解...")
-    #     optimal_gp, profit_gp, results_gp = model_gp.solve(
-    #         initial_guess=[100, 100],
-    #         multi_start=True,
-    #         n_starts=50
-    #     )
-    #
-    #     print(f"最优政府储备量(Q*): {optimal_gp[0]:.4f}")
-    #     print(f"最优企业储备量(q*): {optimal_gp[1]:.4f}")
-    #     print(f"最大利润: {profit_gp:.4f}")
-    #
-    #
-    # except Exception as e:
-    #     print(f"广义帕累托分布模型求解失败: {e}")
+    # 模型参数
+    v = 100  # 单位物资残值
+    p1 = 200  # 灾害前物资单价
+    m = 500  # 灾害后应急物资市场单价
+    alpha = 1  # 灾害发生概率
+    e = 400  # 企业单位物资加急生产成本
+    p2 = 170  # 企业单位物资代储收入
+    c2 = 300  # 企业单位物资储存成本
+    s = 180  # 企业单位物资使用补贴
+    c1 = 120  # 政府单位物资储存成本
+    T = 5551  # 应急物资总需求量（万件）
+
+    uniform_dist = UniformDistribution(0, T)
+
+
+    # 广义帕累托参数
+    gp_dist = GPDistribution(1.26089, 1059.03, 0)
+
+    # 均匀分布
+    model_uniform = EmergencyModel(alpha, v, p1, c1, p2, s, m, uniform_dist)
+
+    # 求解最优储备量
+    print("使用均匀分布求解...")
+    try:
+        optimal_uniform, profit_uniform, results_uniform = model_uniform.solve(
+            initial_guess=[2000, 1000],  # 给一个更合理的初始猜测
+            multi_start=True,
+            n_starts=50
+        )
+
+        print(f"最优政府储备量(Q*): {optimal_uniform[0]:.4f}")
+        print(f"最优企业储备量(q*): {optimal_uniform[1]:.4f}")
+        print(f"最大利润: {profit_uniform:.4f}")
+
+
+    except Exception as e:
+        print(f"均匀分布模型求解失败: {e}")
+
+    # 创建模型实例 - 使用广义帕累托分布
+    try:
+        model_gp = EmergencyModel(alpha, v, p1, c1, p2, s, m, gp_dist)
+
+        # 求解最优储备量
+        print("\n使用广义帕累托分布求解...")
+        optimal_gp, profit_gp, results_gp = model_gp.solve(
+            initial_guess=[100, 100],
+            multi_start=True,
+            n_starts=50
+        )
+
+        print(f"最优政府储备量(Q*): {optimal_gp[0]:.4f}")
+        print(f"最优企业储备量(q*): {optimal_gp[1]:.4f}")
+        print(f"最大利润: {profit_gp:.4f}")
+
+
+    except Exception as e:
+        print(f"广义帕累托分布模型求解失败: {e}")
 
     # 运行敏感性分析
-    print("开始敏感性分析...")
-    run_sensitivity_analysis()
+    # print("开始敏感性分析...")
+    # run_sensitivity_analysis()
 
 
 if __name__ == "__main__":
