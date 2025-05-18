@@ -16,7 +16,27 @@ class Distribution:
     def cdf(self, x):
         """累积分布函数"""
         pass
-
+def calculate_expected_value(distribution_instance: Distribution, lower_bound: float = -np.inf, upper_bound: float = np.inf) -> float:
+    """
+    通过数值积分计算给定概率分布实例的期望值。
+    参数:
+    distribution_instance (Distribution): 实现了 pdf 方法的概率分布实例。
+    lower_bound (float): 积分下限，默认为负无穷。
+    upper_bound (float): 积分上限，默认为正无穷。
+    返回:
+    float: 计算得到的期望值。
+    """
+    # 被积函数 x * pdf(x)
+    integrand = lambda x: x * distribution_instance.pdf(x)
+    
+    # 使用 scipy.integrate.quad进行数值积分
+    # quad 返回一个元组 (积分结果, 估计误差)
+    expected_value, integration_error = integrate.quad(integrand, lower_bound, upper_bound)
+    
+    # 此处可根据需要处理 integration_error
+    # print(f"数值积分误差估计: {integration_error}")
+    
+    return expected_value
 
 class UniformDistribution(Distribution):
     """均匀分布"""
@@ -298,6 +318,86 @@ class EmergencyModel:
             max_profit = -result.fun
 
             return (Q_star, q_star, self.Qj), max_profit, result
+        
+    def solve_with_no_q(self, initial_guess=None, multi_start=True, n_starts=5):
+        """
+        求解最优储备量
+
+        参数:
+        initial_guess - 初始猜测值
+        multi_start - 是否使用多起点优化策略
+        n_starts - 多起点优化时的起点数量
+
+        返回:
+        (Q*, q*) - 最优政府储备量和企业储备量
+        profit - 最大利润值
+        """
+        if initial_guess is None:
+            initial_guess = [5, 5]
+
+        constraints = [
+            {'type': 'ineq', 'fun': lambda x: x[0]},  # Q >= 0
+            {'type': 'ineq', 'fun': lambda x: x[1]},  # q >= 0
+            {'type': 'eq', 'fun': lambda x: x[1]},
+            {'type': 'ineq', 'fun': lambda x: 20 - x[0] - x[1] - self.Qj}
+        ]
+
+        if multi_start:
+            # 多起点优化
+            results = []
+
+            # 生成随机起点
+            np.random.seed(1)  # 设置随机种子以便结果可重复
+            initial_points = np.random.rand(n_starts, 2) * 25
+
+            # 对每个起点进行优化
+            for point in initial_points:
+                try:
+                    result = optimize.minimize(
+                        self.government_profit,
+                        point,
+                        method='SLSQP',
+                        constraints=constraints,
+                        options={'ftol': 1e-8, 'disp': False, 'maxiter': 50000}
+                    )
+                    if result.success:
+                        results.append((result.x, -result.fun, result.success))
+                except Exception as e:
+                    print(f"优化失败，起点: {point}, 错误: {e}")
+
+            if not results:
+                raise ValueError("所有优化尝试都失败了，请检查模型参数和积分设置")
+
+            # 选择最优解
+            results.sort(key=lambda x: x[1], reverse=True)  # 按利润降序排序
+            best_result = results[0]
+
+            Q_star, q_star = best_result[0]
+            max_profit = best_result[1]
+
+            return (Q_star, q_star, self.Qj), max_profit, results
+        else:
+            # 单起点优化
+            result = optimize.minimize(
+                self.government_profit,
+                initial_guess,
+                method='SLSQP',
+                constraints=constraints,
+                options={'ftol': 1e-8, 'disp': True, 'maxiter': 5000}
+            )
+
+            
+            Q_star = Q_star + q_star
+            q_star = 0
+            max_profit = self.government_profit([Q_star, q_star])
+            return (Q_star, q_star, self.Qj), max_profit, result
+
+
+    def solve_signle(self):
+        Q = calculate_expected_value(self.dist)
+        q = 0
+        max_profit = self.government_profit([Q, q])
+        return (Q, q, self.Qj), max_profit
 
 
 def calculate_enterprise_profit(Q, q, Qj, params, distribution):
@@ -456,6 +556,151 @@ def main():
         print(f"反高斯分布模型求解失败: {e}")
 
 
+    uniform_dist = UniformDistribution(0, T)
+
+    model_uniform = EmergencyModel(alpha, v, p1, c1, p2, s, m, e, 0, uniform_dist)
+    # 求解最优储备量
+    print("使用均匀分布求解...")
+    try:
+        optimal_uniform, profit_uniform, results_uniform = model_uniform.solve(
+            initial_guess=[5, 5],  # 给一个更合理的初始猜测
+            multi_start=True,
+            n_starts=50
+        )
+        enterprise_profit = calculate_enterprise_profit(optimal_uniform[0], optimal_uniform[1], optimal_uniform[2], params, uniform_dist)
+
+        print(f"不考虑捐赠最优政府储备量(Q*): {optimal_uniform[0]:.4f}")
+        print(f"不考虑捐赠最优企业储备量(q*): {optimal_uniform[1]:.4f}")
+        print(f"不考虑捐赠企业捐赠量(p*): {optimal_uniform[2]:.4f}")
+        print(f"不考虑捐赠政府最大利润: {profit_uniform:.4f}")
+        print(f"不考虑捐赠企业最大利润:{enterprise_profit:.4f}")
+
+
+    except Exception as e:
+        print(f"不考虑捐赠均匀分布模型求解失败: {e}")
+
+
+    # 创建反高斯分布
+    invgauss_dist = InverseGaussianDistribution(
+            mu=40.69,
+            loc=-0.97,
+            scale=4.87
+    )
+    # 创建模型实例 - 使用反高斯分布
+
+    model_invgauss = EmergencyModel(alpha, v, p1, c1, p2, s, m, e, 0, invgauss_dist)
+    # 求解最优储备量
+    print("\n使用反高斯分布求解...")
+    try:
+        optimal_invgauss, profit_invgauss, results_invgauss = model_invgauss.solve(
+            initial_guess=[5, 5],
+            multi_start=True,
+            n_starts=10
+        )
+        enterprise_profit = calculate_enterprise_profit(optimal_invgauss[0], optimal_invgauss[1], optimal_invgauss[2], params, invgauss_dist)
+        print(f"不考虑捐赠最优政府储备量(Q*): {optimal_invgauss[0]:.4f}")
+        print(f"不考虑捐赠最优企业储备量(q*): {optimal_invgauss[1]:.4f}")
+        print(f"不考虑捐赠企业捐赠量(p*): {optimal_invgauss[2]:.4f}")
+        print(f"不考虑捐赠政府最大利润: {profit_invgauss:.4f}")
+        print(f"不考虑捐赠企业最大利润:{enterprise_profit:.4f}")
+    except Exception as e:
+        print(f"不考虑捐赠反高斯分布模型求解失败: {e}")
+
+    uniform_dist = UniformDistribution(0, T)
+
+    model_uniform = EmergencyModel(alpha, v, p1, c1, p2, s, m, e, lam, uniform_dist)
+    # 求解最优储备量
+    print("使用均匀分布求解...")
+    try:
+        optimal_uniform, profit_uniform, results_uniform = model_uniform.solve_with_no_q(
+            initial_guess=[5, 5],  # 给一个更合理的初始猜测
+            multi_start=True,
+            n_starts=50
+        )
+        enterprise_profit = calculate_enterprise_profit(optimal_uniform[0], optimal_uniform[1], optimal_uniform[2], params, uniform_dist)
+
+        print(f"不考虑企业代储最优政府储备量(Q*): {optimal_uniform[0]:.4f}")
+        print(f"不考虑企业代储最优企业储备量(q*): {optimal_uniform[1]:.4f}")
+        print(f"不考虑企业代储企业捐赠量(p*): {optimal_uniform[2]:.4f}")
+        print(f"不考虑企业代储政府最大利润: {profit_uniform:.4f}")
+        print(f"不考虑企业代储企业最大利润:{enterprise_profit:.4f}")
+
+
+    except Exception as e:
+        print(f"不考虑企业代储均匀分布模型求解失败: {e}")
+
+
+    # 创建反高斯分布
+    invgauss_dist = InverseGaussianDistribution(
+            mu=40.69,
+            loc=-0.97,
+            scale=4.87
+    )
+    # 创建模型实例 - 使用反高斯分布
+
+    model_invgauss = EmergencyModel(alpha, v, p1, c1, p2, s, m, e, lam, invgauss_dist)
+    # 求解最优储备量
+    print("\n使用反高斯分布求解...")
+    try:
+        optimal_invgauss, profit_invgauss, results_invgauss = model_invgauss.solve_with_no_q(
+            initial_guess=[5, 5],
+            multi_start=True,
+            n_starts=10
+        )
+        enterprise_profit = calculate_enterprise_profit(optimal_invgauss[0], optimal_invgauss[1], optimal_invgauss[2], params, invgauss_dist)
+        print(f"不考虑企业代储最优政府储备量(Q*): {optimal_invgauss[0]:.4f}")
+        print(f"不考虑企业代储最优企业储备量(q*): {optimal_invgauss[1]:.4f}")
+        print(f"不考虑企业代储企业捐赠量(p*): {optimal_invgauss[2]:.4f}")
+        print(f"不考虑企业代储政府最大利润: {profit_invgauss:.4f}")
+        print(f"不考虑企业代储企业最大利润:{enterprise_profit:.4f}")
+    except Exception as e:
+        print(f"不考虑企业代储反高斯分布模型求解失败: {e}")
+
+    uniform_dist = UniformDistribution(0, T)
+
+    model_uniform = EmergencyModel(alpha, v, p1, c1, p2, s, m, e, lam, uniform_dist)
+
+    # 求解最优储备量
+    print("使用均匀分布求解...")
+    try:
+        optimal_uniform, profit_uniform = model_uniform.solve_signle(
+        )
+        enterprise_profit = calculate_enterprise_profit(optimal_uniform[0], optimal_uniform[1], optimal_uniform[2], params, uniform_dist)
+
+        print(f"不考虑企业代储和企业生产最优政府储备量(Q*): {optimal_uniform[0]:.4f}")
+        print(f"不考虑企业代储和企业生产最优企业储备量(q*): {optimal_uniform[1]:.4f}")
+        print(f"不考虑企业代储和企业生产企业捐赠量(p*): {optimal_uniform[2]:.4f}")
+        print(f"不考虑企业代储和企业生产政府最大利润: {profit_uniform:.4f}")
+        print(f"不考虑企业代储和企业生产企业最大利润:{enterprise_profit:.4f}")
+
+
+    except Exception as e:
+        print(f"不考虑企业代储和企业生产均匀分布模型求解失败: {e}")
+
+
+    # 创建反高斯分布
+    invgauss_dist = InverseGaussianDistribution(
+            mu=40.69,
+            loc=-0.97,
+            scale=4.87
+    )
+    # 创建模型实例 - 使用反高斯分布
+
+    model_invgauss = EmergencyModel(alpha, v, p1, c1, p2, s, m, e, lam, invgauss_dist)
+    # 求解最优储备量
+    print("\n使用反高斯分布求解...")
+    try:
+        optimal_invgauss, profit_invgauss = model_invgauss.solve_signle(
+    
+        )
+        enterprise_profit = calculate_enterprise_profit(optimal_invgauss[0], optimal_invgauss[1], optimal_invgauss[2], params, invgauss_dist)
+        print(f"不考虑企业代储和企业生产最优政府储备量(Q*): {optimal_invgauss[0]:.4f}")
+        print(f"不考虑企业代储和企业生产最优企业储备量(q*): {optimal_invgauss[1]:.4f}")
+        print(f"不考虑企业代储和企业生产企业捐赠量(p*): {optimal_invgauss[2]:.4f}")
+        print(f"不考虑企业代储和企业生产政府最大利润: {profit_invgauss:.4f}")
+        print(f"不考虑企业代储和企业生产企业最大利润:{enterprise_profit:.4f}")
+    except Exception as e:
+        print(f"不考虑企业代储和企业生产反高斯分布模型求解失败: {e}")
 
 if __name__ == "__main__":
     main()

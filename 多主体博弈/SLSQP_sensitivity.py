@@ -439,32 +439,32 @@ def plot_sensitivity(param_name, param_values, uniform_results, invgauss_results
     uniform_Q, uniform_q, uniform_p, uniform_Qj = uniform_results
     invgauss_Q, invgauss_q, invgauss_p, invgauss_Qj = invgauss_results
 
-    plt.figure(figsize=(8, 5))
+    plt.figure(figsize=(4, 3))
     # 均匀分布子图
-    plt.subplot(2, 1, 1)
-    valid_indices_uniform = [i for i, v in enumerate(uniform_Q) if v is not None]
-    valid_params_uniform = [param_values[i] for i in valid_indices_uniform]
+    # plt.subplot(2, 1, 1)
+    # valid_indices_uniform = [i for i, v in enumerate(uniform_Q) if v is not None]
+    # valid_params_uniform = [param_values[i] for i in valid_indices_uniform]
 
-    if valid_indices_uniform:
-        valid_uniform_Q = [uniform_Q[i] for i in valid_indices_uniform]
-        valid_uniform_q = [uniform_q[i] for i in valid_indices_uniform]
-        valid_uniform_p_residual = [uniform_p[i] for i in valid_indices_uniform]  # p is residual
-        valid_uniform_Qj = [uniform_Qj[i] for i in valid_indices_uniform]
-        plt.plot(valid_params_uniform, valid_uniform_Q, 'ro-', linewidth=2, markersize=8, label=r'政府实物储备量 ($Q^*$)')
-        plt.plot(valid_params_uniform, valid_uniform_q, 'bs-', linewidth=2, markersize=8, label=r'企业实物储备量 ($q^*$)')
-        plt.plot(valid_params_uniform, valid_uniform_Qj, 'mo-', linewidth=2, markersize=8,
-                 label=r'企业捐赠 ($Q^*_j$)')  # New Qj line
-        plt.plot(valid_params_uniform, valid_uniform_p_residual, 'gd-', linewidth=2, markersize=8,
-                 label=r'企业生产能力储备 ($p^*$)')  # p is residual
+    # if valid_indices_uniform:
+    #     valid_uniform_Q = [uniform_Q[i] for i in valid_indices_uniform]
+    #     valid_uniform_q = [uniform_q[i] for i in valid_indices_uniform]
+    #     valid_uniform_p_residual = [uniform_p[i] for i in valid_indices_uniform]  # p is residual
+    #     valid_uniform_Qj = [uniform_Qj[i] for i in valid_indices_uniform]
+    #     plt.plot(valid_params_uniform, valid_uniform_Q, 'ro-', linewidth=2, markersize=8, label=r'政府实物储备量 ($Q^*$)')
+    #     plt.plot(valid_params_uniform, valid_uniform_q, 'bs-', linewidth=2, markersize=8, label=r'企业实物储备量 ($q^*$)')
+    #     plt.plot(valid_params_uniform, valid_uniform_Qj, 'mo-', linewidth=2, markersize=8,
+    #              label=r'企业捐赠 ($Q^*_j$)')  # New Qj line
+    #     plt.plot(valid_params_uniform, valid_uniform_p_residual, 'gd-', linewidth=2, markersize=8,
+    #              label=r'企业生产能力储备 ($p^*$)')  # p is residual
 
-    plt.title('均匀分布 (UD)')
-    plt.xlabel(param_label)
-    plt.ylabel('储备量 (万件)')
+    # plt.title('均匀分布 (UD)')
+    # plt.xlabel(param_label)
+    # plt.ylabel('储备量 (万件)')
 
-    plt.legend(loc='best', frameon=True, shadow=True)
-    plt.grid(True)
-    # 反高斯分布子图
-    plt.subplot(2, 1, 2)
+    # plt.legend(loc='best', frameon=True, shadow=True)
+    # plt.grid(True)
+    # # 反高斯分布子图
+    # plt.subplot(2, 1, 2)
     valid_indices_invgauss = [i for i, v in enumerate(invgauss_Q) if v is not None]
     valid_params_invgauss = [param_values[i] for i in valid_indices_invgauss]
     if valid_indices_invgauss:
@@ -478,7 +478,6 @@ def plot_sensitivity(param_name, param_values, uniform_results, invgauss_results
                  label=r'企业捐赠 ($Q^*_j$)')  # New Qj line
         plt.plot(valid_params_invgauss, valid_invgauss_p_residual, 'gd-', linewidth=2, markersize=8,
                  label=r'企业生产能力储备 ($p^*$)')  # p is residual
-    plt.title('反高斯分布')
     plt.xlabel(param_label)
     plt.ylabel('储备量 (万件)')
 
@@ -646,8 +645,8 @@ def run_sensitivity_analysis():
         ('p1', [200, 210, 220, 230, 240, 250], r'灾害前物资单价 ($p_1$)', 'sensitivity_p1.png'),
         ('c1', [100, 110, 120, 130, 140, 150], r'政府单位物资储存成本 ($c_1$)', 'sensitivity_c1.png'),
         ('m', [450, 470, 490, 500, 510, 530, 550], r'灾害后市场单价 ($m$)', 'sensitivity_m.png'),
-        ('lam', [0.05, 0.08, 0.1, 0.12, 0.15, 0.18, 0.2], r'企业捐赠系数 ($λ$)', 'sensitivity_lam.png'),
-        # ($'T', [15, 18, 20, 22, 25], '应急物资总需求量 ($T$)', 'sensitivity_T.png') # Example for T sensitivity
+        ('lam', [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7], r'企业捐赠系数 ($λ$)', 'sensitivity_lam.png'),
+        ('T', [15, 18, 20, 22, 25], r'应急物资总需求量 ($T$)', 'sensitivity_T.png') # Example for T sensitivity
     ]
 
     for param_name, param_values, param_label, filename in sensitivity_params:
