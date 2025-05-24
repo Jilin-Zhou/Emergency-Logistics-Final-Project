@@ -1,3 +1,4 @@
+\beamer@slide {fig:beamer_policy_guidance}{4}
 \beamer@slide {eq:beamer_uniform_cdf}{10}
 \beamer@slide {eq:beamer_profit_no_disaster_gov}{11}
 \beamer@slide {eq:beamer_expected_profit_gov}{11}
@@ -5,6 +6,5 @@
 \beamer@slide {eq:beamer_enterprise_expected_profit}{12}
 \beamer@slide {fig:beamer_solution_process}{14}
 \beamer@slide {eq:beamer_optimal_Qj}{15}
-\beamer@slide {eq:beamer_pdf_demand}{20}
-\beamer@slide {fig:beamer_dist_fit}{21}
-\beamer@slide {fig:beamer_structure_comparison}{22}
+\beamer@slide {eq:beamer_pdf_demand}{22}
+\beamer@slide {fig:beamer_dist_fit}{23}

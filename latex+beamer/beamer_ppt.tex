@@ -10,6 +10,7 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{palatino}
+\usepackage{caption}
 \usefonttheme[onlymath]{serif}
 
 \usetikzlibrary{arrows, shapes.geometric}
@@ -68,8 +69,16 @@
         \item 国家政策导向：构建政企协同、实物与产能结合的储备模式 \cite{ndrc2022, sfdrrmc2024}。
         \item 强调应急物流社会化 \cite{lu2009应急物资储备的社会化研究}。
     \end{itemize}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\linewidth]{basic_pictures/政府文件.png}
+        \caption{相关政策文件}
+        \label{fig:beamer_policy_guidance}
+    \end{figure}
 \end{frame}
+% 放张图片
 
+% 做成表展示
 \begin{frame}{\insertsectionhead: 文献回顾}
     \begin{itemize}
         \item \textbf{博弈论应用：}
@@ -125,8 +134,8 @@
     \end{itemize}
     \begin{figure}
         \centering
-        \includegraphics[width=0.8\linewidth]{basic_pictures/image.png}
-        \caption{多主体协同应急物资储备计划示意 (概念图，替换为论文图1)}
+        \includegraphics[width=0.6\linewidth]{basic_pictures/结构图.png}
+        \caption{多主体协同应急物资储备计划示意}
     \end{figure}
 \end{frame}
 
@@ -212,7 +221,7 @@
     \draw [arrow] (firm) -- node[anchor=west, xshift=0.1cm] {\footnotesize 响应 $q^*(Q), Q_j^*(Q)$} (gov_solve);
     \draw [arrow] (gov_solve) -- (equilibrium);
     \end{tikzpicture}
-    \caption{Stackelberg博弈求解流程 (源自论文图1)}
+    \caption{Stackelberg博弈求解流程}
     \label{fig:beamer_solution_process}
     \end{figure}
 \end{frame}
@@ -241,8 +250,8 @@
     \begin{itemize}
         \item 政府目标：最大化期望利润 $\pi_g(Q,q)$。
         \item 决策变量：$Q$ (政府实物储备) 和 $q$ (对企业的储备要求)。
-        \item 约束条件：$Q \ge 0, q \ge 0, Q \ge q$ (论文公式 \ref{eq:optimization})。
-        \item Hessian矩阵分析 (论文公式 \ref{eq:hessian}, \ref{eq:determinant})：
+        \item 约束条件：$Q \ge 0, q \ge 0, Q \ge q$。
+        \item Hessian矩阵分析：
             \begin{itemize}
                 \item $\frac{\partial^2 \pi_g(Q,q)}{\partial Q^2} \frac{\partial^2 \pi_g(Q,q)}{\partial q^2} - \left(\frac{\partial^2 \pi_g(Q,q)}{\partial Q\partial q}\right)^2 > 0$
                 \item 表明政府利润函数是 $Q$ 和 $q$ 的凹函数，最大值存在。
@@ -256,21 +265,62 @@
         \item \textbf{适用性：} 求解带约束的非线性规划问题，无需显式Hessian矩阵。
         \item \textbf{核心思想：} 迭代求解二次规划子问题。
     \end{itemize}
-    \textbf{SLSQP算法流程概述 (参考论文算法 \ref{SLSQP算法流程}):}
+    \textbf{SLSQP算法流程概述:}
     \begin{algorithmic}[1]
         \State \textbf{输入:} 初始点 $x_0$, 允许误差 $\varepsilon$, 最大迭代次数 $K$
         \State \textbf{初始化:} $k \leftarrow 0$, $B_0 \leftarrow I$
         \While{$k < K$ \textbf{and} 未收敛}
             \State 计算 $f(x_k), \nabla f(x_k), c_i(x_k), \nabla c_i(x_k)$
-            \State 求解QP子问题得搜索方向 $d_k$ (论文公式 \ref{sub_problem_d_k})
-            \State 线搜索确定步长 $\alpha_k$ (论文公式 \ref{sub_problem_a_k_1}, \ref{sub_problem_a_k_2})
+            \State 求解QP子问题得搜索方向 $d_k$ 
+            \State 线搜索确定步长 $\alpha_k$ 
             \State 更新 $x_{k+1} \leftarrow x_k + \alpha_k d_k$
-            \State 更新Hessian近似 $B_{k+1}$ (论文公式 \ref{B_k})
+            \State 更新Hessian近似 $B_{k+1}$ 
             \State 判断收敛
             \State $k \leftarrow k + 1$
         \EndWhile
         \State \textbf{输出:} 近似最优解 $x_k$
     \end{algorithmic}
+\end{frame}
+
+% 添加一页介绍更新方法
+\begin{frame}{SLSQP 算法核心更新公式}
+    \framesubtitle{补充说明}
+    以下为SLSQP算法中关键步骤的更新公式：
+    \vspace{0.5em}
+    \textbf{1. 求解搜索方向 $d_k$ (二次规划子问题):}
+    \begin{align*}
+        \min_{d} \quad & \nabla f(x_k)^T d + \frac{1}{2}d^T B_k d \\
+        \text{s.t.} \quad & c_i(x_k) + \nabla c_i(x_k)^T d = 0, \quad i \in \mathcal{E} \\
+        & c_i(x_k) + \nabla c_i(x_k)^T d \geq 0, \quad i \in \mathcal{I} \\
+        & l \leq x_k + d \leq u
+    \end{align*}
+    其中 $B_k$ 是Hessian矩阵的近似。
+    
+    \textbf{2. 线搜索确定步长 $\alpha_k$ (Wolfe 条件):}
+    \begin{align*}
+        & f(x_k + \alpha_k d_k) \leq f(x_k) + c_1 \alpha_k \nabla f(x_k)^T d_k \\
+        & |\nabla f(x_k + \alpha_k d_k)^T d_k| \leq c_2 |\nabla f(x_k)^T d_k|
+    \end{align*}
+    其中 $0 < c_1 < c_2 < 1$ 为常数。
+ 
+    
+\end{frame}
+
+\begin{frame}{SLSQP算法核心更新公式}
+    \textbf{3. 更新Hessian近似 $B_{k+1}$:}
+    \begin{itemize}
+        \item 计算位移 $s_k$ 和梯度差 $y_k$:
+            \begin{align*}
+            s_k &= x_{k+1} - x_k \\
+            y_k &= \nabla \mathcal{L}(x_{k+1}, \lambda_k) - \nabla \mathcal{L}(x_k, \lambda_k)
+            \end{align*}
+        \item 其中，拉格朗日函数 $\mathcal{L}(x, \lambda)$ 定义为：
+            \begin{equation*}
+            \mathcal{L}(x, \lambda) = f(x) - \sum_{i \in \mathcal{E} \cup \mathcal{I}} \lambda_i c_i(x)
+            \end{equation*}
+        \item $B_{k+1}$ 通常使用 $s_k$ 和 $y_k$ 通过拟牛顿法（如BFGS）更新，SLSQP采用最小二乘技术估计。
+    \end{itemize}
+
 \end{frame}
 
 \section{算例分析}
@@ -282,7 +332,7 @@
     \end{itemize}
     \begin{table}
     \centering
-    \caption{算例参数设置 (源自论文表 \ref{tab:parameters_setting})}
+    \caption{算例参数设置}
 \small
     \begin{tabular}{llcl}
     \toprule
@@ -312,7 +362,7 @@
     \end{itemize}
     \begin{table}
     \centering
-    \caption{不同概率分布拟合统计量比较 (源自论文表 \ref{tab:distribution_fitting_comparison})}
+    \caption{不同概率分布拟合统计量比较}
         \small
 \begin{tabular}{cccc}
     \toprule
@@ -332,37 +382,82 @@
     \end{equation}
 \end{frame}
 
+% \begin{frame}{\insertsectionhead: 需求分布拟合结果}
+%     \begin{figure}
+%         \centering
+%         \includegraphics[width=0.7\linewidth]{basic_pictures/分布拟合.png}
+%         \caption{分布拟合结果}
+%         \label{fig:beamer_dist_fit}
+%     \end{figure}
+%     \begin{itemize}
+%         \item 实际数据呈右偏分布，小需求概率高。
+%         \item 反高斯分布 (橙色) 较好地拟合了实际数据形态，优于均匀分布 (蓝色) 和广义帕累托分布 (绿色) \cite{Li2022Stackelberg}。
+%     \end{itemize}
+% \end{frame}
+
 \begin{frame}{\insertsectionhead: 需求分布拟合结果}
-    \begin{figure}
-        \centering
-        \includegraphics[width=0.7\linewidth]{basic_pictures/分布拟合.png}
-        \caption{分布拟合结果 (源自论文图 \ref{fig:分布拟合})}
-        \label{fig:beamer_dist_fit}
-    \end{figure}
-    \begin{itemize}
-        \item 实际数据呈右偏分布，小需求概率高。
-        \item 反高斯分布 (橙色) 较好地拟合了实际数据形态，优于均匀分布 (蓝色) 和广义帕累托分布 (绿色) \cite{Li2022Stackelberg}。
-    \end{itemize}
+    \begin{columns}
+        % 左侧文字列，占0.5的宽度
+        \begin{column}{0.5\textwidth}
+            \begin{itemize}
+                \item 实际数据呈右偏分布，小需求概率高。
+                \item 反高斯分布 (橙色) 较好地拟合了实际数据形态，优于均匀分布 (蓝色) 和广义帕累托分布 (绿色) \cite{Li2022Stackelberg}。
+            \end{itemize}
+        \end{column}
+        
+        % 右侧图像列，占0.5的宽度
+        \begin{column}{0.5\textwidth}
+            \centering
+            \includegraphics[width=\linewidth]{basic_pictures/分布拟合.png}
+            \captionof{figure}{分布拟合结果}
+            \label{fig:beamer_dist_fit}
+        \end{column}
+    \end{columns}
 \end{frame}
 
+% \begin{frame}{\insertsectionhead: 不同需求分布下的最优储备结构对比}
+%     \begin{figure}
+%         \centering
+%         \includegraphics[width=0.7\linewidth]{basic_pictures/储备结构对比.png}
+%         \caption{储备结构对比 (U=15万件)}
+%         \label{fig:beamer_structure_comparison}
+%     \end{figure}
+%     \begin{itemize}
+%         \item \textbf{均匀分布：} 政府实物(33.3\%), 企业实物(10.3\%), 企业生产(54.3\%)。
+%         \item \textbf{反高斯分布：} 政府实物(15.6\%), 企业实物(5.7\%), 更依赖企业生产能力。
+%         \item \textbf{启示：} 反高斯分布长尾特性使模型倾向于依赖灾后生产，实物储备起“首轮响应”和“争取时间”作用。
+%     \end{itemize}
+% \end{frame}
+
+%\begin{frame}{\insertsectionhead: 不同需求分布下的最优储备结构对比}
 \begin{frame}{\insertsectionhead: 不同需求分布下的最优储备结构对比}
-    \begin{figure}
-        \centering
-        \includegraphics[width=0.7\linewidth]{basic_pictures/储备结构对比.png}
-        \caption{储备结构对比 (U=15万件) (源自论文图 \ref{fig:structure_comparison})}
-        \label{fig:beamer_structure_comparison}
-    \end{figure}
-    \begin{itemize}
-        \item \textbf{均匀分布：} 政府实物(33.3\%), 企业实物(10.3\%), 企业生产(54.3\%)。
-        \item \textbf{反高斯分布：} 政府实物(15.6\%), 企业实物(5.7\%), 更依赖企业生产能力。
-        \item \textbf{启示：} 反高斯分布长尾特性使模型倾向于依赖灾后生产，实物储备起“首轮响应”和“争取时间”作用。
-    \end{itemize}
+    \begin{columns}
+        % 左边：文字
+        \begin{column}{0.5\textwidth}
+            \begin{itemize}
+                \item \textbf{均匀分布：} 政府实物（33.3\%）、企业实物（10.3\%）、企业生产（54.3\%）。
+                \item \textbf{反高斯分布：} 政府实物（15.6\%）、企业实物（5.7\%），更依赖企业生产能力。
+                \item \textbf{启示：} 反高斯分布长尾特性使模型倾向于依赖灾后生产，实物储备起“首轮响应”和“争取时间”作用。
+            \end{itemize}
+        \end{column}
+
+        % 右边：图片
+        \begin{column}{0.5\textwidth}
+            \centering
+            \includegraphics[width=\linewidth]{basic_pictures/储备结构对比.png}
+            \vspace{0.5em}
+
+            {\small 图：储备结构对比（U=15万件）}
+        \end{column}
+    \end{columns}
 \end{frame}
+
+
 
 \begin{frame}[allowframebreaks]{\insertsectionhead: 不同情景下计算结果}
     \begin{table}
     \centering
-    \caption{不同情景下应急物资储备与利润计算结果 (源自论文表 \ref{tab:simulation_results})}
+    \caption{不同情景下应急物资储备与利润计算结果}
     \tiny % Smaller font for this table
     \begin{tabular}{llrrrrr}
     \toprule
@@ -397,7 +492,7 @@
             \textbf{灾害后市场单价 ($m$)影响}
             \begin{figure}
                 \includegraphics[width=\linewidth]{basic_pictures/sensitivity_m.png}
-                \caption*{(源自论文图 \ref{fig:sensitivity_m})}
+                \caption*{}
             \end{figure}
             \footnotesize $m \uparrow \implies Q^*$稳定, $q^* \uparrow, Q_j^* \uparrow, p^* \downarrow$
         \end{column}
@@ -405,7 +500,7 @@
             \textbf{灾害前物资单价 ($p_1$)影响}
             \begin{figure}
                 \includegraphics[width=\linewidth]{basic_pictures/sensitivity_p1.png}
-                \caption*{(源自论文图 \ref{fig:sensitivity_p1})}
+                \caption*{}
             \end{figure}
             \footnotesize $p_1 \uparrow \implies Q^* \downarrow, q^*$先增后稳, $p^* \uparrow$
         \end{column}
@@ -418,7 +513,7 @@
             \textbf{企业代储收入 ($p_2$)影响}
             \begin{figure}
                 \includegraphics[width=\linewidth]{basic_pictures/sensitivity_p2.png}
-                \caption*{(源自论文图 \ref{fig:sensitivity_p2})}
+                \caption*{}
             \end{figure}
             \footnotesize $p_2 \uparrow \implies Q^*$先稳后增, $q^* \downarrow$ (趋零)
         \end{column}
@@ -426,7 +521,7 @@
             \textbf{企业使用补贴 ($s$)影响}
             \begin{figure}
                 \includegraphics[width=\linewidth]{basic_pictures/sensitivity_s.png}
-                \caption*{(源自论文图 \ref{fig:sensitivity_s})}
+                \caption*{}
             \end{figure}
             \footnotesize $s \uparrow \implies Q^*$先稳后增, $q^* \downarrow$ (趋零)
         \end{column}
@@ -439,7 +534,7 @@
             \textbf{单位物资残值 ($v$)影响}
             \begin{figure}
                 \includegraphics[width=\linewidth]{basic_pictures/sensitivity_v.png}
-                \caption*{(源自论文图 \ref{fig:sensitivity_v})}
+                \caption*{}
             \end{figure}
             \footnotesize $v \uparrow \implies Q^* \uparrow, q^*$先稳后降 (趋零)
         \end{column}
@@ -447,7 +542,7 @@
             \textbf{灾害发生概率 ($\alpha$)影响}
             \begin{figure}
                 \includegraphics[width=\linewidth]{basic_pictures/sensitivity_alpha.png}
-                \caption*{(源自论文图 \ref{fig:sensitivity_alpha})}
+                \caption*{}
             \end{figure}
             \footnotesize $\alpha \uparrow \implies Q^* \uparrow, q^* \uparrow, p^* \downarrow$
         \end{column}
@@ -460,7 +555,7 @@
             \textbf{政府储存成本 ($c_1$)影响}
             \begin{figure}
                 \includegraphics[width=\linewidth]{basic_pictures/sensitivity_c1.png}
-                \caption*{(源自论文图 \ref{fig:sensitivity_c1})}
+                \caption*{}
             \end{figure}
             \footnotesize $c_1 \uparrow \implies Q^* \downarrow, q^*$ ($c_1 \ge 120$后) $\uparrow$后稳
         \end{column}
@@ -468,7 +563,7 @@
             \textbf{企业捐赠系数 ($\lambda$)影响}
             \begin{figure}
                 \includegraphics[width=\linewidth]{basic_pictures/sensitivity_lam.png}
-                \caption*{(源自论文图 \ref{fig:sensitivity_lam})}
+                \caption*{}
             \end{figure}
             \footnotesize $\lambda \uparrow \implies Q^*$先稳后降, $q^* \downarrow$ (趋零), $Q_j^* \uparrow$
         \end{column}
@@ -483,7 +578,7 @@
     \end{itemize}
     \begin{table}
     \centering
-    \caption{SLSQP算法求解结果与文献精确解对比 (源自论文表 \ref{tab:slsqp_vs_exact})}
+    \caption{SLSQP算法求解结果与文献精确解对比}
     \small
     \begin{tabular}{clccc}
     \toprule
