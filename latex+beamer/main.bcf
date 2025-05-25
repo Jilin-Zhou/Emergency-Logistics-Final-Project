@@ -651,8 +651,6 @@
     <bcf:option datatype="boolean">eprint</bcf:option>
     <bcf:option datatype="boolean">related</bcf:option>
     <bcf:option datatype="boolean">subentry</bcf:option>
-    <bcf:option datatype="boolean">gbnosameeditor</bcf:option>
-    <bcf:option datatype="boolean">gbnoothers</bcf:option>
     <bcf:option datatype="boolean">citexref</bcf:option>
     <bcf:option datatype="boolean">gbmedium</bcf:option>
     <bcf:option datatype="boolean">gbannote</bcf:option>
@@ -2968,14 +2966,14 @@
     <bcf:citekey order="22" intorder="3">xu2010managing</bcf:citekey>
     <bcf:citekey order="23" intorder="1">Gong2024Quantity</bcf:citekey>
     <bcf:citekey order="24" intorder="1">torabi2018integrated</bcf:citekey>
-    <bcf:citekey order="25" intorder="1">Zheng2023CSR</bcf:citekey>
+    <bcf:citekey order="25" intorder="1">zhengh2023</bcf:citekey>
     <bcf:citekey order="26" intorder="1">wang2023考虑维护水平</bcf:citekey>
     <bcf:citekey order="27" intorder="1">hu2018考虑企业生产能力</bcf:citekey>
     <bcf:citekey order="28" intorder="1">zhang2016emergency</bcf:citekey>
     <bcf:citekey order="29" intorder="1">jiang2024基于代储模式</bcf:citekey>
     <bcf:citekey order="30" intorder="1">Li2022Stackelberg</bcf:citekey>
     <bcf:citekey order="30" intorder="2">Chen2023Contract</bcf:citekey>
-    <bcf:citekey order="31" intorder="1">Zheng2023CSR</bcf:citekey>
+    <bcf:citekey order="31" intorder="1">zhengh2023</bcf:citekey>
     <bcf:citekey order="32" intorder="1">chai2021考虑储备周期</bcf:citekey>
     <bcf:citekey order="32" intorder="2">chen2014突发事件灾前应急物资政企联合储备模式</bcf:citekey>
     <bcf:citekey order="33" intorder="1">Li2022Stackelberg</bcf:citekey>

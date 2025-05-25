@@ -5,6 +5,7 @@
 \beamer@slide {eq:beamer_enterprise_profit_no_disaster}{12}
 \beamer@slide {eq:beamer_enterprise_expected_profit}{12}
 \beamer@slide {fig:beamer_solution_process}{14}
-\beamer@slide {eq:beamer_optimal_Qj}{15}
+\beamer@slide {eq:optimization}{16}
+\beamer@slide {eq:hessian}{16}
 \beamer@slide {eq:beamer_pdf_demand}{22}
 \beamer@slide {fig:beamer_dist_fit}{23}

@@ -66,7 +66,7 @@
     \begin{itemize}
         \item 我国自然灾害频发，应急物资储备至关重要 \cite{MEM2024disaster, chen2009modern}。
         \item 传统储备模式问题：物资单一、成本高、效率低 \cite{chen2014突发事件灾前应急物资政企联合储备模式, wang2023防汛物资}。
-        \item 国家政策导向：构建政企协同、实物与产能结合的储备模式 \cite{ndrc2022, sfdrrmc2024}。
+        \item 国家政策导向（《指导意见》和《十四五规划》）：构建政企协同、实物与产能结合的储备模式 \cite{ndrc2022, sfdrrmc2024}。
         \item 强调应急物流社会化 \cite{lu2009应急物资储备的社会化研究}。
     \end{itemize}
     \begin{figure}
@@ -110,13 +110,14 @@
     \textbf{现有研究不足：}
     \begin{itemize}
         \item 企业社会责任(CSR)考量不足：多将企业视为纯粹逐利者 \cite{Li2022Stackelberg, Chen2023Contract}，忽视利他行为 \cite{zhengh2023}。
-        \item 需求分布假设简化：多采用均匀分布 \cite{chai2021考虑储备周期, chen2014突发事件灾前应急物资政企联合储备模式}，与现实差异大。
-        \item 多样化储备方式协同研究不足：多单独研究物资储备 \cite{Li2022Stackelberg, li2022政企联合储备, Chen2023Contract} 或产能储备 \cite{Gong2024Quantity}，企业捐赠协同效应研究空白。
+        \item 需求分布假设简化：多采用均匀分布 \cite{chai2021考虑储备周期, chen2014突发事件灾前应急物资政企联合储备模式}，与现实差异大，进而做出误导性的决策（Garbage in，Garbage out）。
+        \item 多样化储备方式协同研究不足：多单独研究物资储备 \cite{Li2022Stackelberg, li2022政企联合储备, Chen2023Contract} 或产能储备 \cite{Gong2024Quantity}，企业捐赠协同效应研究空白。此外，忽略合理性约束（国家规定政府储存大于企业储存\cite{sfdrrmc2024}）.
     \end{itemize}
     \textbf{本文研究目的与贡献：}
     \begin{itemize}
         \item 构建更全面且贴近现实的政企联合应急物资储备决策模型。
         \item 考虑企业社会责任、多种储备方式协同及更真实的需求分布。
+        \item 提出一种求解方法，求解提出的模型。
     \end{itemize}
 \end{frame}
 
@@ -145,6 +146,7 @@
         \item \textbf{物资保质期：} 储备周期小于保质期，期末残值 $v$ 轮换。
         \item \textbf{政府协同前提：} $p_1 + c_1 - v - p_2 > 0$。
         \item \textbf{企业参与激励：} $s > v$ 且 $m > s + p_2$。
+        \item \textbf{极端事件概率：} 把企业和政府，以及后来企业捐赠物资全部都使用掉的概率视为极端事件。当$x\geq Q + q + Q_j$，概率密度$f(x) \simeq 0$。
     \end{enumerate}
 \end{frame}
 
@@ -174,7 +176,7 @@
         \item $Q+q < x \leq Q+q+Q_j$: $-(p_1+c_1)Q - p_2q - sq$
         \item $Q+q+Q_j < x \leq U$: $-(p_1+c_1)Q - p_2q - sq - m(x-Q-q-Q_j)$
     \end{itemize}
-    政府总期望利润 ($\pi_g(Q,q)$):
+    政府总期望利润 ($\pi_g(Q,q)$，其中${\pi}_{g,\alpha}(Q_j,q) = \int_0^U \pi_{g,\alpha}(Q_j,q) f(x) dx$):
     \begin{equation} \label{eq:beamer_expected_profit_gov}
     \pi_g(Q,q) = (1-\alpha) \pi_{g,0}(Q,q) + \alpha \pi_{g,\alpha}(Q,q, Q_j)
     \end{equation}
@@ -193,7 +195,7 @@
         \item $Q+q < x \leq Q+q+Q_j$: $sq + (p_2 - c_2)q + \lambda(m-e)\sqrt{Q_jm} - eQ_j$
         \item $x > Q+q+Q_j$: $sq + (p_2 - c_2)q + \lambda(m-e)\sqrt{Q_jm} - eQ_j + (m-e)(x-Q-q-Q_j)$
     \end{itemize}
-    企业总期望利润 (${\pi}_r(Q_j,q)$):
+    企业总期望利润，(${\pi}_r(Q_j,q)$，其中${\pi}_{r,\alpha}(Q_j,q) = \int_0^U \pi_{r,\alpha}(Q_j,q) f(x) dx$):
     \begin{equation} \label{eq:beamer_enterprise_expected_profit}
     {\pi}_r(Q_j,q) = (1-\alpha){\pi}_{r,0}(q) + \alpha{\pi}_{r,\alpha}(Q_j,q)
     \end{equation}
@@ -229,12 +231,10 @@
 \begin{frame}{\insertsectionhead: 企业最优响应}
     \textbf{1. 确定最优捐赠量 $Q_j^*$}
     \begin{itemize}
-        \item 对 $\pi_r(Q_j,q)$ 关于 $Q_j$ 求一阶偏导数 $\frac{\partial{\pi}_r}{\partial Q_j}$。
-        \item 二阶偏导数 $\frac{\partial^2 {\pi}_r}{\partial Q_j^2} < 0$, 表明 $\pi_r$ 是 $Q_j$ 的严格凹函数。
-        \item 最优捐赠量 $Q_j^*$ (由 $\frac{\partial{\pi}_r}{\partial Q_j}=0$ 且 $f(Q+q+Q_j) \approx 0$ 近似得到):
-        \begin{equation} \label{eq:beamer_optimal_Qj}
-        Q_j^* = \frac{\lambda^2 m (m-e)^2}{4e^2}
-        \end{equation}
+        \item 对 $Q_j$ 求一阶偏导数 $\frac{\partial{\pi}_r}{\partial Q_j} =\alpha[ \frac{\lambda(m-e)\sqrt{m}}{2\sqrt{Q_j}} [1 - F(Q+q)] + (m-e) F(Q+q+Q_j) + e F(Q+q) - m ]$。
+        \item 二阶偏导数 $\frac{\partial^2 {\pi}_r}{\partial Q_j^2}= \alpha  (m-e) f(Q+q+Q_j)- \frac{\lambda(m-e)\sqrt{m}}{4 Q_j^{3/2}} [1 - F(Q+q)] > 0 $, 表明 $\pi_r$ 是 $Q_j$ 的严格凹函数。
+        \item 最优捐赠量 $Q_j^*$ (由 $\frac{\partial{\pi}_r}{\partial Q_j}=0$ 且 $f(Q+q+Q_j) \approx 0$ 近似得到):\\
+        $Q_j^* = \frac{\lambda^2 m (m-e)^2}{4e^2}$
         此 $Q_j^*$ 不依赖于 $Q$ 和 $q$。
     \end{itemize}
     \vspace{0.5em}
@@ -244,15 +244,33 @@
         \item 结果显示 $\frac{\partial \pi_r(Q,q)}{\partial q} > 0$ 恒成立。
         \item \textbf{结论：} 企业期望利润随 $q$ 单调递增。在政府引导或设定企业储备量 $q$ 的框架下，企业最优响应是执行政府设定的 $q$ 值。
     \end{itemize}
-f\end{frame}
+\end{frame}
 
 \begin{frame}{\insertsectionhead: 政府最优决策}
-    \begin{itemize}
-        \item 政府目标：最大化期望利润 $\pi_g(Q,q)$。
-        \item 决策变量：$Q$ (政府实物储备) 和 $q$ (对企业的储备要求)。
-        \item 约束条件：$Q \ge 0, q \ge 0, Q \ge q$。
+   \begin{small}
+    \begin{equation} \label{eq:optimization}
+\begin{split}
+\max \quad & \pi_g(Q,q) \\
+\text{s. t.} \quad & Q \ge 0 ,q \ge 0\\
+& Q\ge q
+\end{split}
+\end{equation}
+\end{small} 
+\begin{itemize}        
         \item Hessian矩阵分析：
-            \begin{itemize}
+        \begin{equation} \label{eq:hessian}
+\boldsymbol{H} = \begin{bmatrix}
+\frac{\partial^2 \pi_g(Q,q)}{\partial Q^2} & \frac{\partial^2 \pi_g(Q,q)}{\partial Q\partial q} \\
+\frac{\partial^2 \pi_g(Q,q)}{\partial q\partial Q} & \frac{\partial^2 \pi_g(Q,q)}{\partial q^2}
+\end{bmatrix}
+\end{equation}
+\begin{small}
+    \begin{align*}
+\frac{\partial^2 \pi_g(Q,q)}{\partial Q^2} &= \alpha [ (s-v)f(Q) + s f(Q+q) - m f(Q+q+Q_j) ] \\
+\frac{\partial^2 \pi_g(Q,q)}{\partial q^2} &= \frac{\partial^2 \pi_g(Q,q)}{\partial Q\partial q} =  \alpha [ s f(Q+q) - m f(Q+q+Q_j) ] 
+\end{align*}
+\end{small}
+        \begin{itemize}
                 \item $\frac{\partial^2 \pi_g(Q,q)}{\partial Q^2} \frac{\partial^2 \pi_g(Q,q)}{\partial q^2} - \left(\frac{\partial^2 \pi_g(Q,q)}{\partial Q\partial q}\right)^2 > 0$
                 \item 表明政府利润函数是 $Q$ 和 $q$ 的凹函数，最大值存在。
             \end{itemize}

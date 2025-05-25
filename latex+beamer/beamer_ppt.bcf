@@ -651,8 +651,6 @@
     <bcf:option datatype="boolean">eprint</bcf:option>
     <bcf:option datatype="boolean">related</bcf:option>
     <bcf:option datatype="boolean">subentry</bcf:option>
-    <bcf:option datatype="boolean">gbnosameeditor</bcf:option>
-    <bcf:option datatype="boolean">gbnoothers</bcf:option>
     <bcf:option datatype="boolean">citexref</bcf:option>
     <bcf:option datatype="boolean">gbmedium</bcf:option>
     <bcf:option datatype="boolean">gbannote</bcf:option>
@@ -2976,17 +2974,18 @@
     <bcf:citekey order="21" intorder="2">li2022政企联合储备</bcf:citekey>
     <bcf:citekey order="21" intorder="3">Chen2023Contract</bcf:citekey>
     <bcf:citekey order="22" intorder="1">Gong2024Quantity</bcf:citekey>
-    <bcf:citekey order="23" intorder="1">Li2022Stackelberg</bcf:citekey>
-    <bcf:citekey order="24" intorder="1">chai2021考虑储备周期</bcf:citekey>
-    <bcf:citekey order="24" intorder="2">chen2014突发事件灾前应急物资政企联合储备模式</bcf:citekey>
-    <bcf:citekey order="24" intorder="3">hu2018考虑企业生产能力</bcf:citekey>
-    <bcf:citekey order="25" intorder="1">balcik2010coordination</bcf:citekey>
-    <bcf:citekey order="26" intorder="1">china_emergency_management_2020</bcf:citekey>
-    <bcf:citekey order="27" intorder="1">Li2022Stackelberg</bcf:citekey>
-    <bcf:citekey order="28" intorder="1">LIY2023</bcf:citekey>
-    <bcf:citekey order="28" intorder="2">zhengh2023</bcf:citekey>
-    <bcf:citekey order="28" intorder="3">XTGL202004012</bcf:citekey>
+    <bcf:citekey order="23" intorder="1">sfdrrmc2024</bcf:citekey>
+    <bcf:citekey order="24" intorder="1">Li2022Stackelberg</bcf:citekey>
+    <bcf:citekey order="25" intorder="1">chai2021考虑储备周期</bcf:citekey>
+    <bcf:citekey order="25" intorder="2">chen2014突发事件灾前应急物资政企联合储备模式</bcf:citekey>
+    <bcf:citekey order="25" intorder="3">hu2018考虑企业生产能力</bcf:citekey>
+    <bcf:citekey order="26" intorder="1">balcik2010coordination</bcf:citekey>
+    <bcf:citekey order="27" intorder="1">china_emergency_management_2020</bcf:citekey>
+    <bcf:citekey order="28" intorder="1">Li2022Stackelberg</bcf:citekey>
     <bcf:citekey order="29" intorder="1">LIY2023</bcf:citekey>
+    <bcf:citekey order="29" intorder="2">zhengh2023</bcf:citekey>
+    <bcf:citekey order="29" intorder="3">XTGL202004012</bcf:citekey>
+    <bcf:citekey order="30" intorder="1">LIY2023</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">
