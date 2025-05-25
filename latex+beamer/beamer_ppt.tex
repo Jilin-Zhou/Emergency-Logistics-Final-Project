@@ -178,7 +178,7 @@
     \begin{equation} \label{eq:beamer_expected_profit_gov}
     \pi_g(Q,q) = (1-\alpha) \pi_{g,0}(Q,q) + \alpha \pi_{g,\alpha}(Q,q, Q_j)
     \end{equation}
-    (详细积分形式见论文公式 3, 4)
+    
 \end{frame}
 
 \begin{frame}{\insertsectionhead: 企业期望收益}
@@ -197,7 +197,7 @@
     \begin{equation} \label{eq:beamer_enterprise_expected_profit}
     {\pi}_r(Q_j,q) = (1-\alpha){\pi}_{r,0}(q) + \alpha{\pi}_{r,\alpha}(Q_j,q)
     \end{equation}
-    (详细积分形式见论文公式 6, 7)
+   
 \end{frame}
 
 \section{模型求解}
@@ -229,8 +229,8 @@
 \begin{frame}{\insertsectionhead: 企业最优响应}
     \textbf{1. 确定最优捐赠量 $Q_j^*$}
     \begin{itemize}
-        \item 对 $\pi_r(Q_j,q)$ 关于 $Q_j$ 求一阶偏导数 $\frac{\partial{\pi}_r}{\partial Q_j}$ (论文公式 \ref{eq:partial_pi_r_Qj})。
-        \item 二阶偏导数 $\frac{\partial^2 {\pi}_r}{\partial Q_j^2} < 0$ (论文公式 \ref{eq:second_partial_pi_r_Qj} 及后续分析), 表明 $\pi_r$ 是 $Q_j$ 的严格凹函数。
+        \item 对 $\pi_r(Q_j,q)$ 关于 $Q_j$ 求一阶偏导数 $\frac{\partial{\pi}_r}{\partial Q_j}$。
+        \item 二阶偏导数 $\frac{\partial^2 {\pi}_r}{\partial Q_j^2} < 0$, 表明 $\pi_r$ 是 $Q_j$ 的严格凹函数。
         \item 最优捐赠量 $Q_j^*$ (由 $\frac{\partial{\pi}_r}{\partial Q_j}=0$ 且 $f(Q+q+Q_j) \approx 0$ 近似得到):
         \begin{equation} \label{eq:beamer_optimal_Qj}
         Q_j^* = \frac{\lambda^2 m (m-e)^2}{4e^2}
@@ -240,11 +240,11 @@
     \vspace{0.5em}
     \textbf{2. 确定最优储备量 $q^*$}
     \begin{itemize}
-        \item 对 $\pi_r(Q,q)$ 关于 $q$ 求一阶偏导数 $\frac{\partial \pi_r(Q,q)}{\partial q}$ (论文公式 \ref{eq:foc_enterprise_interm})。
+        \item 对 $\pi_r(Q,q)$ 关于 $q$ 求一阶偏导数 $\frac{\partial \pi_r(Q,q)}{\partial q}$。
         \item 结果显示 $\frac{\partial \pi_r(Q,q)}{\partial q} > 0$ 恒成立。
         \item \textbf{结论：} 企业期望利润随 $q$ 单调递增。在政府引导或设定企业储备量 $q$ 的框架下，企业最优响应是执行政府设定的 $q$ 值。
     \end{itemize}
-\end{frame}
+f\end{frame}
 
 \begin{frame}{\insertsectionhead: 政府最优决策}
     \begin{itemize}

@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999995 (MiKTeX 24.1) (preloaded format=xelatex 2025.2.26)  25 MAY 2025 00:45
+This is XeTeX, Version 3.141592653-2.6-0.999995 (MiKTeX 24.1) (preloaded format=xelatex 2025.2.26)  25 MAY 2025 09:12
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1891,20 +1891,7 @@ Overfull \vbox (2.77376pt too high) detected at line 227
 
 [14
 
-]
-
-LaTeX Warning: Reference `eq:partial_pi_r_Qj' on page 15 undefined on input lin
-e 247.
-
-
-LaTeX Warning: Reference `eq:second_partial_pi_r_Qj' on page 15 undefined on in
-put line 247.
-
-
-LaTeX Warning: Reference `eq:foc_enterprise_interm' on page 15 undefined on inp
-ut line 247.
-
-[15
+] [15
 
 ] [16
 
@@ -1930,15 +1917,15 @@ File: basic_pictures/储备结构对比.png Graphic file (type bmp)
 <basic_pictures/储备结构对比.png>
  [24
 
-] [25
+]
+[25
 
 ]
 File: basic_pictures/sensitivity_m.png Graphic file (type bmp)
 <basic_pictures/sensitivity_m.png>
 File: basic_pictures/sensitivity_p1.png Graphic file (type bmp)
 <basic_pictures/sensitivity_p1.png>
-
-[26
+ [26
 
 ]
 File: basic_pictures/sensitivity_p2.png Graphic file (type bmp)
@@ -2036,9 +2023,6 @@ L3 programming layer <2022/08/05>
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
-
-LaTeX Warning: There were undefined references.
-
 Package rerunfilecheck Info: File `beamer_ppt.out' has not changed.
 (rerunfilecheck)             Checksum: DBE49C689B188AD8BFCCA1695BCAD05B;474.
 Package logreq Info: Writing requests to 'beamer_ppt.run.xml'.
@@ -2046,10 +2030,10 @@ Package logreq Info: Writing requests to 'beamer_ppt.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 45876 strings out of 409617
- 966047 string characters out of 5781321
+ 45873 strings out of 409617
+ 965974 string characters out of 5781321
  1983191 words of memory out of 5000000
- 67164 multiletter control sequences out of 15000+600000
+ 67161 multiletter control sequences out of 15000+600000
  600547 words of font info for 137 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  128i,20n,123p,1309b,5462s stack positions out of 10000i,1000n,20000p,200000b,200000s
