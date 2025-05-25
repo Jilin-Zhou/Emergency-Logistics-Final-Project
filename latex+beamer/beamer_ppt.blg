@@ -1,15 +1,15 @@
 [0] Config.pm:307> INFO - This is Biber 2.19
 [0] Config.pm:310> INFO - Logfile is 'beamer_ppt.blg'
-[103] biber-MSWIN64:340> INFO - === 
-[142] Biber.pm:419> INFO - Reading 'beamer_ppt.bcf'
-[272] Biber.pm:979> INFO - Found 35 citekeys in bib section 0
-[286] Biber.pm:4419> INFO - Processing section 0
-[296] Biber.pm:4610> INFO - Looking for bibtex file 'reference.bib' for section 0
-[361] bibtex.pm:1713> INFO - LaTeX decoding ...
-[409] bibtex.pm:1519> INFO - Found BibTeX data source 'reference.bib'
-[785] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
-[785] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
-[785] Biber.pm:4239> INFO - Sorting list 'none/global//global/global' of type 'entry' with template 'none' and locale 'en-US'
-[785] Biber.pm:4245> INFO - No sort tailoring available for locale 'en-US'
-[810] bbl.pm:660> INFO - Writing 'beamer_ppt.bbl' with encoding 'UTF-8'
-[835] bbl.pm:763> INFO - Output to beamer_ppt.bbl
+[96] biber-MSWIN64:340> INFO - === 
+[133] Biber.pm:419> INFO - Reading 'beamer_ppt.bcf'
+[260] Biber.pm:979> INFO - Found 35 citekeys in bib section 0
+[272] Biber.pm:4419> INFO - Processing section 0
+[283] Biber.pm:4610> INFO - Looking for bibtex file 'reference.bib' for section 0
+[343] bibtex.pm:1713> INFO - LaTeX decoding ...
+[390] bibtex.pm:1519> INFO - Found BibTeX data source 'reference.bib'
+[751] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[751] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[751] Biber.pm:4239> INFO - Sorting list 'none/global//global/global' of type 'entry' with template 'none' and locale 'en-US'
+[751] Biber.pm:4245> INFO - No sort tailoring available for locale 'en-US'
+[775] bbl.pm:660> INFO - Writing 'beamer_ppt.bbl' with encoding 'UTF-8'
+[799] bbl.pm:763> INFO - Output to beamer_ppt.bbl
