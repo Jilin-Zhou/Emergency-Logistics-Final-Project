@@ -1,1 +1,1 @@
-This project is a course paper that focuses on solving issues related to multi-agent collaboration in reserving emergency supplies.
+This project is a course paper that focuses on solving issues related to multi-agent collaboration in reserving emergency supplies, jointly conducted and owned by a team consisting of Ke Zhang and Jilin Zhou.
